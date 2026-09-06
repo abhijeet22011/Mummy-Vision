@@ -19,7 +19,7 @@ class EyeDetector:
         self.RIGHT_EYE = [362, 385, 387, 263, 373, 380]
 
         self.EYE_CLOSED_THRESHOLD = 0.20
-        self.SLEEP_THRESHOLD_FRAMES = 1
+        self.SLEEP_THRESHOLD_FRAMES = 8
         self.closed_frames = 0
 
     def calculate_eye_ratio(self, landmarks, eye_indices, width, height):
@@ -46,6 +46,7 @@ class EyeDetector:
         return ratio
 
     def detect(self, frame):
+        is_sleepy = False
         rgb_frame = cv2.cvtColor(
             frame,
             cv2.COLOR_BGR2RGB
