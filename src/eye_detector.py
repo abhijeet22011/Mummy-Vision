@@ -18,6 +18,10 @@ class EyeDetector:
         self.LEFT_EYE = [33, 160, 158, 133, 153, 144]
         self.RIGHT_EYE = [362, 385, 387, 263, 373, 380]
 
+        self.EYE_CLOSED_THRESHOLD = 0.20
+        self.SLEEP_THRESHOLD_FRAMES = 1
+        self.closed_frames = 0
+
     def calculate_eye_ratio(self, landmarks, eye_indices, width, height):
         points = []
 
@@ -72,4 +76,13 @@ class EyeDetector:
                 height
             )
 
-        return frame, left_ratio, right_ratio
+            average_ratio = (left_ratio + right_ratio) / 2
+
+            if average_ratio < self.EYE_CLOSED_THRESHOLD:
+                self.closed_frames += 1
+            else:
+                self.closed_frames = 0
+
+            is_sleepy = self.closed_frames >= self.SLEEP_THRESHOLD_FRAMES
+
+        return frame, left_ratio, right_ratio, is_sleepy
