@@ -1,5 +1,6 @@
 import cv2
 import mediapipe as mp
+import math
 
 
 class EyeDetector:
@@ -13,21 +14,62 @@ class EyeDetector:
             min_tracking_confidence=0.5
         )
 
+        # MediaPipe eye landmark indices
+        self.LEFT_EYE = [33, 160, 158, 133, 153, 144]
+        self.RIGHT_EYE = [362, 385, 387, 263, 373, 380]
+
+    def calculate_eye_ratio(self, landmarks, eye_indices, width, height):
+        points = []
+
+        for index in eye_indices:
+            landmark = landmarks[index]
+
+            x = int(landmark.x * width)
+            y = int(landmark.y * height)
+
+            points.append((x, y))
+
+        # Vertical distances
+        vertical_1 = math.dist(points[1], points[5])
+        vertical_2 = math.dist(points[2], points[4])
+
+        # Horizontal distance
+        horizontal = math.dist(points[0], points[3])
+
+        # Eye Aspect Ratio
+        ratio = (vertical_1 + vertical_2) / (2.0 * horizontal)
+
+        return ratio
+
     def detect(self, frame):
-        # OpenCV uses BGR, MediaPipe expects RGB
-        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        rgb_frame = cv2.cvtColor(
+            frame,
+            cv2.COLOR_BGR2RGB
+        )
 
         results = self.face_mesh.process(rgb_frame)
 
+        left_ratio = 0.0
+        right_ratio = 0.0
+
         if results.multi_face_landmarks:
-            for face_landmarks in results.multi_face_landmarks:
-                h, w, _ = frame.shape
+            face_landmarks = results.multi_face_landmarks[0]
+            landmarks = face_landmarks.landmark
 
-                # Draw all face landmarks
-                for landmark in face_landmarks.landmark:
-                    x = int(landmark.x * w)
-                    y = int(landmark.y * h)
+            height, width, _ = frame.shape
 
-                    cv2.circle(frame, (x, y), 1, (0, 255, 0), -1)
+            left_ratio = self.calculate_eye_ratio(
+                landmarks,
+                self.LEFT_EYE,
+                width,
+                height
+            )
 
-        return frame
+            right_ratio = self.calculate_eye_ratio(
+                landmarks,
+                self.RIGHT_EYE,
+                width,
+                height
+            )
+
+        return frame, left_ratio, right_ratio
