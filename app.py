@@ -35,7 +35,7 @@ while True:
 
     # Phone Detection
     frame, phone_detected = phone_detector.detect(frame)
-    
+
     if phone_detected:
       cv2.putText(
         frame,
@@ -76,8 +76,8 @@ while True:
         if not  pygame.mixer.get_busy():
                   sleep_alarm.play()
 
-    # Press Q to exit
-    if cv2.waitKey(1) & 0xFF == ord("q"):
+    # Press E to exit
+    if cv2.waitKey(1) & 0xFF == ord("e"):
         break
 
 
