@@ -17,7 +17,7 @@ class PhoneDetector:
                 class_id = int(box.cls[0])
                 confidence = float(box.conf[0])
 
-                if class_id == 67 and confidence > 0.75:
+                if class_id == 67 and confidence > 0.85:
 
                     phone_detected = True
 
